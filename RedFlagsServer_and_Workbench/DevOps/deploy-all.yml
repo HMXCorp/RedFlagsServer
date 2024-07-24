@@ -1,0 +1,31 @@
+trigger:
+- none
+
+parameters:
+- name: resourceGroupName
+  displayName: 'Resource Group Name'
+  type: string
+
+variables:
+- template: Templates/variables.yml
+
+stages:
+- stage: DeployResources
+  displayName: 'Deploy Resources'
+  jobs:
+  - template: Templates/resources-template.yml
+    parameters:
+      resourceGroupName: ${{ parameters.resourceGroupName }}
+      resourceGroupLocation: ${{ variables.resourceGroupLocation }}
+      azureSubscription: ${{ variables.azureSubscription }}
+
+- stage: StartCRex
+  dependsOn: DeployResources
+  displayName: 'Start CRex'
+  variables:
+  - template: Templates/variables.yml
+  jobs:
+  - template: Templates/crex-template.yml
+    parameters:
+      resourceGroupName: ${{ parameters.resourceGroupName }}
+      azureSubscription: ${{ variables.AzureSubscription }}

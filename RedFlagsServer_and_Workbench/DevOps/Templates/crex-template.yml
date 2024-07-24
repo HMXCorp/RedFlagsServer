@@ -1,0 +1,28 @@
+parameters:
+- name: resourceGroupName
+  displayName: 'Resource Group Name'
+  type: string
+
+- name: azureSubscription
+  displayName: 'Azure Subscription'
+  type: string
+
+jobs:
+- job: StartCRex
+  displayName: 'Start CRex'
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: AzureCLI@2
+    displayName: 'Start CRex'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        containerAppName='hmxcrex-app'
+
+        az containerapp revision copy \
+          --name $containerAppName \
+          --resource-group ${{ parameters.resourceGroupName }} \
+          --set-env-vars DEMO_MODE=true

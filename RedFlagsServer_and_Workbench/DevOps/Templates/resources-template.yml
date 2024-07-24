@@ -1,0 +1,202 @@
+parameters:
+- name: resourceGroupName
+  displayName: 'Resource Group Name'
+  type: string
+
+- name: resourceGroupLocation
+  displayName: 'Resource Group Location'
+  type: string
+
+- name: azureSubscription
+  displayName: 'Azure Subscription'
+  type: string
+
+jobs:
+- job: DeployResources
+  displayName: 'Deploy Resources'
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - task: AzureCLI@2
+    displayName: 'Deploy Resources'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        location=${{ parameters.resourceGroupLocation }}
+        templateFile='Deployment/ARM/azure-resources.json'
+        parametersFile='Deployment/ARM/azure-resources.parameters.json'
+
+        echo "Creating resource group: ${{ parameters.resourceGroupName }}"
+        az group create \
+          --name ${{ parameters.resourceGroupName }} \
+          --location $location
+
+        echo "Deploying resources to resource group: ${{ parameters.resourceGroupName }}"
+        az deployment group create \
+          --resource-group ${{ parameters.resourceGroupName }} \
+          --template-file $templateFile \
+          --parameters $parametersFile
+
+  - task: AzureCLI@2
+    displayName: 'Upload Configuration Files'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        cmPath='Deployment/Configuration/VAT-Tax-CognitiveMap.json'
+        dmPath='Deployment/Configuration/VAT-Tax-DataModel.xmi'
+        storageName=$(az storage account list --resource-group ${{ parameters.resourceGroupName }} --query '[0].name' --output tsv)
+        storageConnectionString=$(az storage account show-connection-string --resource-group ${{ parameters.resourceGroupName }} --name $storageName --query connectionString --output tsv)
+        containerName='crex'
+
+        echo "Creating $containerName container in ${{ parameters.resourceGroupName }}/$storageName"
+        az storage container create \
+          --account-name $storageName \
+          --name $containerName \
+          --connection-string $storageConnectionString
+
+        echo "Uploading Cognitive Map file to ${{ parameters.resourceGroupName }}/$storageName/$containerName"
+        az storage blob upload \
+          --account-name $storageName \
+          --container-name $containerName \
+          --file $cmPath \
+          --name "Tax/CognitiveMap/VAT-Tax-CognitiveMap.json" \
+          --connection-string $storageConnectionString \
+          --overwrite
+
+        echo "Uploading Data Model file to ${{ parameters.resourceGroupName }}/$storageName/$containerName"
+        az storage blob upload \
+          --account-name $storageName \
+          --container-name $containerName \
+          --file $dmPath \
+          --name "Tax/XMI/VAT-Tax-DataModel.xmi" \
+          --connection-string $storageConnectionString \
+          --overwrite
+
+  - task: AzureCLI@2
+    displayName: 'Set Variables'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        keyVaultName=$(az keyvault list --resource-group ${{ parameters.resourceGroupName }} --query "[0].name" -o tsv)
+        echo "##vso[task.setvariable variable=keyVaultName]$keyVaultName"
+
+  - task: AzureKeyVault@2
+    displayName: 'Fetch Key Vault Secrets'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      KeyVaultName: '$(keyVaultName)'
+      SecretsFilter: '*'
+
+  - task: AzureCLI@2
+    displayName: 'Add Key Vault Secrets'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'bash'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        keyVaultName=$(az keyvault list --resource-group ${{ parameters.resourceGroupName }} --query "[0].name" -o tsv)
+        servicePrincipal=$(az account show --query user.name -o tsv)
+        servicePrincipalId=$(az ad sp show --id $servicePrincipal --query objectId -o tsv)
+        subscriptionId=$(az account show --query id -o tsv)
+        scope="/subscriptions/$subscriptionId/resourceGroups/${{ parameters.resourceGroupName }}/providers/Microsoft.KeyVault/vaults/$keyVaultName"
+
+        echo "Adding secrets to $keyVaultName"
+
+        echo "Adding ApplicationInsights--ConnectionString"
+        appInsightsConnectionString=$(az monitor app-insights component show --resource-group ${{ parameters.resourceGroupName }} --app hmxcrex-insights --query "connectionString" -o tsv)
+        az keyvault secret set \
+            --vault-name $keyVaultName \
+            --name "ApplicationInsights--ConnectionString" \
+            --value $appInsightsConnectionString \
+            --output none
+
+        echo "Adding ApplicationInsights--InstrumentationKey"
+        appInsightsInstrumentationKey=$(az monitor app-insights component show --resource-group ${{ parameters.resourceGroupName }} --app hmxcrex-insights --query "instrumentationKey" -o tsv)
+        az keyvault secret set \
+            --vault-name $keyVaultName \
+            --name "ApplicationInsights--InstrumentationKey" \
+            --value $appInsightsInstrumentationKey \
+            --output none
+
+        echo "Adding Database--ConnectionString--CRexTax"
+        sqlServerName=$(az sql server list --resource-group ${{ parameters.resourceGroupName }} --query "[0].fullyQualifiedDomainName" -o tsv)
+        sqlConnectionString="Server=tcp:$sqlServerName,1433;Initial Catalog=hmxcrex-sqldatabase;User ID=$(Database--AdminUsername);Password=$(Database--AdminPassword);Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;MultipleActiveResultSets=True;"
+        az keyvault secret set \
+          --vault-name $keyVaultName \
+          --name "Database--ConnectionString--CRexTax" \
+          --value "$sqlConnectionString" \
+          --output none
+
+- job: ConfigureDatabase
+  dependsOn: DeployResources
+  displayName: 'Configure Database'
+  pool:
+    vmImage: 'windows-latest'
+  steps:
+  - task: AzureCLI@2
+    displayName: 'Set Variables'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        $keyVaultName = (az keyvault list --resource-group ${{ parameters.resourceGroupName }} --query "[0].name" -o tsv)
+        Write-Host "##vso[task.setvariable variable=keyVaultName]$keyVaultName"
+
+        $sqlServerAddress = (az sql server list --resource-group ${{ parameters.resourceGroupName }} --query "[0].fullyQualifiedDomainName" -o tsv)
+        Write-Host "##vso[task.setvariable variable=sqlServerAddress]$sqlServerAddress"
+
+  - task: AzureKeyVault@2
+    displayName: 'Fetch Key Vault Secrets'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      KeyVaultName: '$(keyVaultName)'
+      SecretsFilter: '*'
+
+  - task: SqlAzureDacpacDeployment@1
+    displayName: 'Create CRex Tables'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      deployType: 'SqlTask'
+      ServerName: '$(sqlServerAddress)'
+      DatabaseName: 'hmxcrex-sqldatabase'
+      SqlUsername: '$(Database--AdminUsername)'
+      SqlPassword: '$(Database--AdminPassword)'
+      SqlFile: 'Deployment/Configuration/CRex_Create.sql'
+
+  - task: SqlAzureDacpacDeployment@1
+    displayName: 'Create Tax Tables'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      deployType: 'SqlTask'
+      ServerName: '$(sqlServerAddress)'
+      DatabaseName: 'hmxcrex-sqldatabase'
+      SqlUsername: '$(Database--AdminUsername)'
+      SqlPassword: '$(Database--AdminPassword)'
+      SqlFile: 'Deployment/Configuration/Tax_Create.sql'
+
+  - task: AzureCLI@2
+    displayName: 'Add Container App IP to Database Firewall'
+    inputs:
+      azureSubscription: ${{ parameters.azureSubscription }}
+      scriptType: 'pscore'
+      scriptLocation: 'inlineScript'
+      inlineScript: |
+        $sqlServerName = (az sql server list --resource-group ${{ parameters.resourceGroupName }} --query "[0].name" -o tsv)
+        $containerAppIpRanges = (az containerapp show --name hmxcrex-app --resource-group ${{ parameters.resourceGroupName }} --query "properties.outboundIpAddresses" -o tsv)
+        $ipArray = $containerAppIpRanges -split "`n"
+        
+        foreach ($ip in $ipArray) {
+          az sql server firewall-rule create `
+            --resource-group ${{ parameters.resourceGroupName }} `
+            --server $sqlServerName `
+            --name "hmxcrex-app-$ip" `
+            --start-ip-address $ip `
+            --end-ip-address $ip
+        }

@@ -1,0 +1,385 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "registryPassword": {
+      "type": "securestring",
+      "minLength": 1
+    },
+    "servicePrincipalId": {
+      "type": "securestring",
+      "minLength": 1
+    }
+  },
+  "variables": {
+    "keyVaultSecretsOfficerRoleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/b86a8fe4-44ce-4948-aee5-eccb2c155cd7",
+    "storageBlobDataOwnerRoleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/b7e6dc6d-f1e8-4753-8033-0f276bb0955b",
+    "keyVaultAdministratorRoleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/00482a5a-887f-4fb3-b363-3b7fe8e74483",
+    "contributorRoleDefinitionId": "/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c",
+    "functionAppName": "[concat('hmxcrex-functions-', uniqueString(resourceGroup().id))]",
+    "keyVaultName": "[concat('hmxcrex-kv-', uniqueString(resourceGroup().id))]",
+    "sqlServerName": "[concat('hmxcrex-sqlserver-', uniqueString(resourceGroup().id))]",
+    "storageAccountName": "[concat('hmxcrexstrg', uniqueString(resourceGroup().id))]",
+    "uniqueString": "[uniqueString(resourceGroup().id, resourceGroup().location)]",
+    "passwordBase": "[base64(concat(variables('uniqueString'), 'MySaltString'))]",
+    "sqlPassword": "[substring(variables('passwordBase'), 0, 16)]",
+    "sqlUsername": "sqladmin"
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Sql/servers",
+      "apiVersion": "2022-05-01-preview",
+      "location": "[resourceGroup().location]",
+      "name": "[variables('sqlServerName')]",
+      "properties": {
+        "administratorLogin": "[variables('sqlUsername')]",
+        "administratorLoginPassword": "[variables('sqlPassword')]"
+      },
+      "resources": [
+        {
+          "type": "databases",
+          "apiVersion": "2023-08-01-preview",
+          "location": "[resourceGroup().location]",
+          "name": "hmxcrex-sqldatabase",
+          "dependsOn": [ "[variables('sqlServerName')]" ],
+          "properties": {
+            "collation": "SQL_Latin1_General_CP1_CI_AS"
+          },
+          "sku": {
+            "name": "GP_S_Gen5",
+            "tier": "GeneralPurpose",
+            "family": "Gen5",
+            "capacity": 1
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, 'Container App - Database Contributor')]",
+      "dependsOn": [
+        "hmxcrex-app",
+        "[variables('sqlServerName')]"
+      ],
+      "scope": "[concat('Microsoft.Sql/servers/', variables('sqlServerName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('contributorRoleDefinitionId')]",
+        "principalId": "[reference('hmxcrex-app', '2024-03-01', 'full').identity.principalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, 'Function App - Database Contributor')]",
+      "dependsOn": [
+        "[variables('functionAppName')]",
+        "[variables('sqlServerName')]"
+      ],
+      "scope": "[concat('Microsoft.Sql/servers/', variables('sqlServerName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('contributorRoleDefinitionId')]",
+        "principalId": "[reference(variables('functionAppName'), '2023-12-01', 'full').identity.principalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-12-01",
+      "name": "[variables('functionAppName')]",
+      "dependsOn": [
+        "hmxcrex-appplan",
+        "hmxcrex-insights",
+        "[variables('storageAccountName')]",
+        "[variables('keyVaultName')]"
+      ],
+      "location": "[resourceGroup().location]",
+      "kind": "functionapp,linux,container",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', 'hmxcrex-appplan')]",
+        "siteConfig": {
+          "linuxFxVersion": "[concat('DOCKER|', 'hmxcrex.azurecr.io/hmxcrexfunctions:latest')]",
+          "appSettings": [
+            {
+              "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+              "value": "[reference(resourceId('Microsoft.Insights/components', 'hmxcrex-insights'), '2015-05-01').ConnectionString]"
+            },
+            {
+              "name": "AzureKeyVaultName",
+              "value": "[variables('keyVaultName')]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value,';EndpointSuffix=','core.windows.net')]"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_PASSWORD",
+              "value": "[parameters('registryPassword')]"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_URL",
+              "value": "https://hmxcrex.azurecr.io"
+            },
+            {
+              "name": "DOCKER_REGISTRY_SERVER_USERNAME",
+              "value": "TaxAppPull"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "dotnet-isolated"
+            },
+            {
+              "name": "WEBSITE_HTTPLOGGING_RETENTION_DAYS",
+              "value": "7"
+            },
+            {
+              "name": "WEBSITES_ENABLE_APP_SERVICE_STORAGE",
+              "value": "false"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, 'Container App - Function App Contributor')]",
+      "dependsOn": [
+        "[variables('functionAppName')]",
+        "hmxcrex-app"
+      ],
+      "scope": "[concat('Microsoft.Web/sites/', variables('functionAppName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('contributorRoleDefinitionId')]",
+        "principalId": "[reference('hmxcrex-app', '2024-03-01', 'full').identity.principalId]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults",
+      "apiVersion": "2023-07-01",
+      "name": "[variables('keyVaultName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "sku": {
+          "family": "A",
+          "name": "standard"
+        },
+        "tenantId": "[subscription().tenantId]",
+        "enableRbacAuthorization": true
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, 'Container App - Key Vault Administrator')]",
+      "dependsOn": [
+        "[variables('keyVaultName')]",
+        "hmxcrex-app"
+      ],
+      "scope": "[concat('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('keyVaultAdministratorRoleDefinitionId')]",
+        "principalId": "[reference('hmxcrex-app', '2024-03-01', 'full').identity.principalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, 'Function App - Key Vault Administrator')]",
+      "dependsOn": [
+        "[variables('keyVaultName')]",
+        "[variables('functionAppName')]"
+      ],
+      "scope": "[concat('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('keyVaultAdministratorRoleDefinitionId')]",
+        "principalId": "[reference(variables('functionAppName'), '2023-12-01', 'full').identity.principalId]"
+      }
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-04-01-preview",
+      "name": "[concat(variables('keyVaultName'), '/Database--AdminUsername')]",
+      "properties": {
+        "value": "[variables('sqlUsername')]"
+      },
+      "dependsOn": [ "[variables('keyVaultName')]" ]
+    },
+    {
+      "type": "Microsoft.KeyVault/vaults/secrets",
+      "apiVersion": "2021-04-01-preview",
+      "name": "[concat(variables('keyVaultName'), '/Database--AdminPassword')]",
+      "properties": {
+        "value": "[variables('sqlPassword')]"
+      },
+      "dependsOn": [ "[variables('keyVaultName')]" ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, 'Service Principal - Key Vault Secrets Officer')]",
+      "dependsOn": [ "[variables('keyVaultName')]" ],
+      "scope": "[concat('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('keyVaultSecretsOfficerRoleDefinitionId')]",
+        "principalId": "[parameters('servicePrincipalId')]"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2023-01-01",
+      "name": "[variables('storageAccountName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "Standard_LRS"
+      },
+      "kind": "StorageV2"
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id, 'Container App - Storage Owner')]",
+      "dependsOn": [ "hmxcrex-app" ],
+      "scope": "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+      "properties": {
+        "roleDefinitionId": "[variables('storageBlobDataOwnerRoleDefinitionId')]",
+        "principalId": "[reference('hmxcrex-app', '2024-03-01', 'full').identity.principalId]"
+      }
+    },
+    {
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2022-09-01",
+      "location": "[resourceGroup().location]",
+      "name": "hmxcrex-appplan",
+      "kind": "linux",
+      "sku": {
+        "name": "B2",
+        "tier": "Basic",
+        "size": "B2",
+        "family": "B",
+        "capacity": 1
+      },
+      "properties": {
+        "reserved":  true
+      }
+    },
+    {
+      "type": "Microsoft.App/managedEnvironments",
+      "apiVersion": "2024-03-01",
+      "name": "hmxcrex-appenvironment",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "workloadProfiles": [
+          {
+            "workloadProfileType": "Consumption",
+            "name": "Consumption"
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.App/containerApps",
+      "apiVersion": "2024-03-01",
+      "name": "hmxcrex-app",
+      "dependsOn": [
+        "[variables('storageAccountName')]",
+        "[variables('functionAppName')]",
+        "hmxcrex-appenvironment",
+        "hmxcrex-insights"
+      ],
+      "location": "[resourceGroup().location]",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "properties": {
+        "environmentId": "[resourceId('Microsoft.App/managedEnvironments', 'hmxcrex-appenvironment')]",
+        "workloadProfileName": "Consumption",
+        "configuration": {
+          "ingress": {
+            "external": true,
+            "targetPort": 8080
+          },
+          "registries": [
+            {
+              "server": "hmxcrex.azurecr.io",
+              "username": "TaxAppPull",
+              "passwordSecretRef": "registry-password"
+            }
+          ],
+          "secrets": [
+            {
+              "name": "registry-password",
+              "value": "[parameters('registryPassword')]"
+            }
+          ]
+        },
+        "template": {
+          "containers": [
+            {
+              "name": "crex-tax",
+              "image": "hmxcrex.azurecr.io/hmxcrex:latest",
+              "resources": {
+                "cpu": 4,
+                "memory": "8Gi"
+              },
+              "env": [
+                {
+                  "name": "APP_NAME",
+                  "value": "Tax"
+                },
+                {
+                  "name": "APPLICATIONINSIGHTS_CONNECTION_STRING",
+                  "value": "[reference(resourceId('Microsoft.Insights/components', 'hmxcrex-insights'), '2015-05-01').ConnectionString]"
+                },
+                {
+                  "name": "DEMO_MODE",
+                  "value": "false"
+                },
+                {
+                  "name": "Azure--FunctionsURL",
+                  "value": "[concat('https://management.azure.com/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name, '/providers/Microsoft.Web/sites/', variables('functionAppName'), '/functions')]"
+                },
+                {
+                  "name": "Azure--KeyVaultName",
+                  "value": "[variables('keyVaultName')]"
+                },
+                {
+                  "name": "Azure--StorageURL",
+                  "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').primaryEndpoints.blob]"
+                },
+                {
+                  "name": "ServiceBus--Enabled",
+                  "value": "false"
+                },
+                {
+                  "name": "ServiceBus--QueueName",
+                  "value": "crex"
+                }
+              ]
+            }
+          ],
+          "scale": {
+            "minReplicas": 1,
+            "maxReplicas": 1
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Insights/components",
+      "apiVersion": "2015-05-01",
+      "name": "hmxcrex-insights",
+      "location": "[resourceGroup().location]",
+      "kind": "web",
+      "properties": {
+        "Application_Type": "web"
+      }
+    }
+  ]
+}

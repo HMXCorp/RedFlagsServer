@@ -1,0 +1,12 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "registryPassword": {
+      "value": "Z9bJGnd8kty1rt8C85+qNPaxU5zPm3pODaFUtICGs8+ACRAYngBY"
+    },
+    "servicePrincipalId": {
+      "value": "7d638b8d-e844-4de2-a3d4-4281263d00f7"
+    }
+  }
+}

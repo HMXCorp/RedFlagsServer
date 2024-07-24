@@ -1,0 +1,69 @@
+{
+  "cognitiveMap": {
+    "$type": "Goal",
+    "ID": "topgoal",
+    "isTopGoal": true,
+    "Name": "G1",
+    "Description": "Is a fair and equitable business environment assured?",
+    "Role": "VAT Tax",
+    "Children": {
+      "$type": "NodeList",
+      "$values": [
+        {
+          "$type": "Goal",
+          "ID": "goal11",
+          "SpawnedBy": [],
+          "Name": "G1.1",
+          "Description": "Is declaration of all sales encouraged?",
+          "Role": "VAT Tax",
+          "Children": {
+            "$type": "NodeList",
+            "$values": [
+              {
+                "$type": "Goal",
+                "ID": "goal111",
+                "SpawnedBy": [],
+                "Name": "G1.1.1",
+                "Description": "Is the issuance of electronic documents maximized?",
+                "Role": "VAT Tax",
+                "Children": {
+                  "$type": "NodeList",
+                  "$values": [
+                    {
+                      "$type": "Situation",
+                      "ID": "situation1111",
+                      "Spawns": [],
+                      "Name": "S1.1.1.1",
+                      "Description": "High invoice cancellation rate",
+                      "Condition": "Functions.TaxPayer.CancelledRatio(transaction) > 0.3",
+                      "Action": [
+                        "Functions.NoAction() = 1"
+                      ],
+                      "Class": "TaxPayer",
+                      "Impact": "-1",
+                      "Execution": "1 hours",
+                      "Percept": "Abnormal",
+                      "Descriptors": [
+                        {
+                          "Descriptor": "Functions.TaxPayer.CancelledRatio()",
+                          "DescriptorType": "function"
+                        }
+                      ],
+                      "ConditionStrings": [
+                        "Functions.TaxPayer.CancelledRatio(transaction) > 0.3"
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "cognitiveMapVersion": "1.0.0.6",
+  "cognitiveMapName": "VAT Tax",
+  "startDate": "2/19/2024 12:00:00 AM",
+  "username": "vjacques@hmx.ai"
+}
