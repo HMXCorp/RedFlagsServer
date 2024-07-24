@@ -1,11 +1,11 @@
 # Red Flags Server and Excel Workbench Add-in
 
-Two capabilities are available to users of the Accelerator software: (1) the Red Flags Server and (2) the Red Flags Excel Workbench Add-in. The Red Flags Server is an Azure service that enables you to define critical risk signals to monitor and maintain a database of red flags that occur based on taxpayer data. The Red Flags Excel Workbench Add-in is applies the [HMX.ai CRex Add-in for Excel](https://appsource.microsoft.com/en-us/product/office/WA200005695?tab=Overview). Red Flags Add-in for Excel is free to download from Microsoft AppSource. Both the Red Flags Server and Excel Workbench have the following key features:
+Two important capabilities are available to users of the Accelerator software: (1) the Red Flags Server and (2) the Red Flags Excel Workbench Add-in. The Red Flags Server is an Azure service that enables you to define critical risk signals to monitor and maintain a database of red flags that occur based on taxpayer data. The Red Flags Excel Workbench Add-in is applies the [HMX.ai CRex Add-in for Excel](https://appsource.microsoft.com/en-us/product/office/WA200005695?tab=Overview). Red Flags Add-in for Excel is free to download from Microsoft AppSource. Both the Red Flags Server and Excel Workbench have the following key features:
 
 - **Goal-Oriented** - Define tax authority goals most relevant to managing compliance and transparency.
 - **Situation-Centric** - Define the critical situations that a tax authority wants to uncover and track to determine the best actions to take.
-- **Cognitive Maps** - Organize goals and situations in a graphical 'Cognitive Map' that represents tax authority compliance management plans.
-- **Simulation Scenarios** - Run simulations for what-if scenarios and fine-tune the tax authority compliance management plans.
+- **Cognitive Maps** - Organize goals and situations in a graphical way to represents compliance management or any other type of plan.
+- **Simulation Scenarios** - Run simulations for what-if scenarios to see the results and fine-tune compliance management plans.
 - **CoPilot Integration** - Investigate how decisions impact organizational goal achievement and situational awareness with natural language Q&A.
 
 ## Red Flags Server
@@ -71,9 +71,9 @@ The YAML file will now run and create all required resources, set the needed con
 
 The Workbench uses the familiar capabilities of Excel to simplify creation and management of red flags. The Red Flags Workbench Excel file provided in this repository includes example data tables created from public data sources. You can use this workbook to become familiar with the Workbench Add-in capabilities. You can also create and manage your own red flags using data that you add to Excel by following the steps below.
 
-1. Download the 'Red Flags Workbench - VAT Tax.xlsx' Excel Workbook provided in this repository folder and open the file within Excel.
+1. Download [RedFlagsWorkbench-VAT Tax.xlsx](RedFlagsServer_and_Workbench/RedFlagsWorkbench-VATTax.xlsx) Excel Workbook provided in this repository folder and open the file within Excel. An example for procurement compliance, [RedFlagsWorkbench-Procurement.xlsx](RedFlagsServer_and_Workbench/RedFlagsWorkbench-Procurement.xlsx) is also provided. The following instructions assume download of the VAT Tax example Excel workbook.
 
-![Red Flags Workbench - VAT Tax.xlsx](./RedFlagsServer_and_Workbench/images/Picture1.png)
+![RedFlagsWorkbench-VAT Tax.xlsx](./RedFlagsServer_and_Workbench/images/Picture1.png)
 
 2. Obtain the HMX.ai CRex Add-in for Excel from the Excel 'File-Get Add-ins' menu item.
 
@@ -126,7 +126,7 @@ The Workbench uses the familiar capabilities of Excel to simplify creation and m
 - Click the Run button to start a simulation.
 
     During a simulation, the Add-in assesses each of the red flags you defined for the data you have provided. The Add-in automatically evaluates Goal Achievement based on whether flags are present. Adverse or red flags reduce Goal Achievement while Favorable or green flags increase Goal Achievement.
-8.Run and review reports and locate the data causig the presence of a red flag.
+8.Run and review reports and locate the data causing a red flag.
 
 ![Red Flags Workbench Reports](./RedFlagsServer_and_Workbench/images/Picture7.png)
 
@@ -137,7 +137,7 @@ The Workbench uses the familiar capabilities of Excel to simplify creation and m
 
 ![Red Flags Workbench Reports](./RedFlagsServer_and_Workbench/images/Picture8.png)
 
-- Click on the Goals & Situations button at the top of any Workbench Add-in pane and scroll down to the Cognitive Map. The red notiifcation badges indicate the number of flags present for each of the specified flag situations (recall that they can be either red or green flags).
+- Click on the Goals & Situations button at the top of any Workbench Add-in pane and scroll down to the Cognitive Map. The red notification badges indicate the number of flags present for each of the specified flag situations (recall that they can be either red or green flags).
 - Click on a flag badge that displays a non-zero value. A list will be displayed where each item is one of the Key Entities, for example a taxpayer or invoice, for which the flag was assessed to be present.
 - Click on any item in the displayed list and the focus will shift to the row in the Key Entity table containing the data that caused the flag to be assessed as present. You can then examine these data to understand the cause of the flag.
 9.Use OpenAI to obtain explanations of your Red Flag Situation definitions.
