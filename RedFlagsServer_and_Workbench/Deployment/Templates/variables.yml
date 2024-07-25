@@ -1,3 +1,3 @@
 variables:
-  azureSubscription: 'HMX ACTS Microsoft Azure (82554940-d766-4a79-9883-7360692e18ef)'
+  azureSubscription: '<YourAzureSubscriptionName> <(YourSubscriptionID)>'
   resourceGroupLocation: 'eastus2'
