@@ -89,7 +89,7 @@ The functional tests consist of (a) checking the Container App Log stream to con
 
 2. Confirm that results are being written to the SQL Server database. The deployed resources include a SQL database resource that you will find in the resource group listing. Navigate to this resource and select 'Query editor (preview)' (You will need the 'sqladmin' password, which you can retrieve from the 'key vault' resource created in the deployment. Search for the 'Key vault' that was created, navigate to the 'Secrets', select 'Database--AdminPassword', select the 'CURRENT VERSION' in the list, and click the copy icon at the end of the 'Secret value' text box.). Log into the Query Editor and 'situation_results_true' table as shown in the figure below. Confirm that this table contains several rows with data in all columns with the exception of the 'simulation_date' (this) column is not populated since the example Red Flags Server application is running in real-time mode rather than simulation mode).
 
-![SituationResults]./RedFlagsServer_and_Workbench/images/SituationResults-query.png)
+![SituationResults](./RedFlagsServer_and_Workbench/images/SituationResults-query.png)
 
 For more information on the Red Flags Server, implemented in [HMX.ai](https://hmx.ai) CRex<sup>TM</sup> Enterprise, please email [info@HMX.ai](mailto:info@hmx.ai?subject=Information%20on%20CRex%20Enterprise).
 
@@ -113,25 +113,25 @@ The Workbench uses the familiar capabilities of Excel to simplify creation and m
 
 ![Red Flags Workbench Add-in](./RedFlagsServer_and_Workbench/images/Picture2.png)
 
-    - Search AppSource for 'HMX' then click Add next to 'CRex Add-in for Excel'.
-    - Click the 'HMX CRex' button on the right-hand side of the Excel Home ribbon to open the Add-in.
+- Search AppSource for 'HMX' then click Add next to 'CRex Add-in for Excel'.
+- Click the 'HMX CRex' button on the right-hand side of the Excel Home ribbon to open the Add-in.
 3. Organize your data in Excel tables.
 
 ![Red Flags Workbench Excel Tables](./RedFlagsServer_and_Workbench/images/Picture3.png)
 
-    - You can use any data, organized in Excel Tables.
-    - To add your own data, use Excel's Data ribbon to get the data you want to analyze and copy it to an Excel worksheet. 
-    - Each table is a Key Entity in your analysis. Key Entities are what you’re monitoring to achieve your goals. For example, taxpayers, invoices, etc.
+- You can use any data, organized in Excel Tables.
+- To add your own data, use Excel's Data ribbon to get the data you want to analyze and copy it to an Excel worksheet. 
+- Each table is a Key Entity in your analysis. Key Entities are what you’re monitoring to achieve your goals. For example, taxpayers, invoices, etc.
 4. Create a Cognitive Map.
-    - On the Add-in landing pane, Click **+** (see figure above) to build your own Cognitive Map.  A Cognitive Map contains the goals you wish to achieve, and the situations that impact them.
+- On the Add-in landing pane, Click **+** (see figure above) to build your own Cognitive Map.  A Cognitive Map contains the goals you wish to achieve, and the situations that impact them.
 5. Create your Cognitive Map as a tree view of your Goals and the important Situations that impact each Goal.
 
 ![Red Flags Workbench Cognitive Map](./RedFlagsServer_and_Workbench/images/Picture4.png)
 
-    - **Goals** are objectives you want to achieve, like ensuring customer satisfaction, procurement integrity, or maximum ROI.
-    - **Situations** are the Red Flags (these are used as synonyms below), the conditions that impact achievement of your goals, like compliance red flags.
-    - **Key Entities** are contained in the Excel tables you inserted into your workbook. They are what you’re monitoring to achieve goals. For example, taxpayers, or invoices. Red Flag are always associated with your key entities, for example, late tax filing is a red flag associated with taxpayer key entities.
-    - **Goal Impact** measures the favorable or negative impact of a red flag when it is present. A positive Goal Impact indicates a favorable or desirable "review" or "green flag". A negative Goal Impact indicates an adverse or undesired red flag.
+- **Goals** are objectives you want to achieve, like ensuring customer satisfaction, procurement integrity, or maximum ROI.
+- **Situations** are the Red Flags (these are used as synonyms below), the conditions that impact achievement of your goals, like compliance red flags.
+- **Key Entities** are contained in the Excel tables you inserted into your workbook. They are what you’re monitoring to achieve goals. For example, taxpayers, or invoices. Red Flag are always associated with your key entities, for example, late tax filing is a red flag associated with taxpayer key entities.
+- **Goal Impact** measures the favorable or negative impact of a red flag when it is present. A positive Goal Impact indicates a favorable or desirable "review" or "green flag". A negative Goal Impact indicates an adverse or undesired red flag.
 6. Define how you assess whether a red flag is present, based on your data, by entering an Excel formula for each red flag Assessor.
 
 ![Red Flags Workbench Assessor](./RedFlagsServer_and_Workbench/images/Picture5.png)
