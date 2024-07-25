@@ -63,7 +63,7 @@ To create the required resources and deploy the Red Flags Server, follow the ste
 
 ![AccessProvided](./RedFlagsServer_and_Workbench/images/AccessProvided.png)
 
-The YAML file will now run and create all required resources, set the needed configurations, deploy Red Flags Server application, and start the application.
+The YAML file will now run and create all required resources, set the needed configurations, deploy the Red Flags Server application, and start the application.
 
 ### Functional Test
 
