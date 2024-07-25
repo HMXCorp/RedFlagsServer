@@ -31,7 +31,7 @@ To create the required resources and deploy the Red Flags Server, follow the ste
 - azureSubscription - this is your Azure subscription name followed by a space, followed by the subscription ID in parenthesis. For example: 'My Azure Subscription (123456789-d123-12a34-1234-12345678e910ef)'. Note that this Azure subscription is the service connection corresponding to the subscription identified when you connected your Azure DevOps account to the GitHub repository.
 - resourceGroupLocation - this is the region in which your resources will be located. You can explore more about Azure regions and their specific features on the [Azure Global Infrastructure page](https://azure.microsoft.com/en-us/explore/global-infrastructure/geographies/).
   
-3. Log into the Azure DevOps portal and in the palette select 'Pipelines' to display Pipelines list, which will be empty if no pipelines have been previously created.
+3. Log into the Azure DevOps portal and in the palette select 'Pipelines' to display the Pipelines list, which will be empty if no pipelines have been previously created.
 
 ![DevOpsPipelineList](./RedFlagsServer_and_Workbench/images/DevOpsPipelineList.png)
 
