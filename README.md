@@ -1,11 +1,11 @@
 # Red Flags Server and Excel Workbench Add-in
 
-Two important capabilities are available to users of the Accelerator software: (1) the Red Flags Server and (2) the Red Flags Excel Workbench Add-in. The Red Flags Server is an Azure service that enables you to define critical risk signals to monitor and maintain a database of red flags that occur based on taxpayer data. The Red Flags Excel Workbench Add-in is applies the [HMX.ai CRex Add-in for Excel](https://appsource.microsoft.com/en-us/product/office/WA200005695?tab=Overview). Red Flags Add-in for Excel is free to download from Microsoft AppSource. Both the Red Flags Server and Excel Workbench have the following key features:
+Two important capabilities are available to users of the Accelerator software: (1) the Red Flags Server and (2) the Red Flags Excel Workbench Add-in. The Red Flags Server is an Azure service that enables you to define critical risk signals to monitor and maintain a database of red flags that occur based on data in a database or incoming message flow. The Red Flags Server is an [HMX.ai](https://hmx.ai) CRex<sup>TM</sup> (Cognitive Reasoning Engine) Enterprise application. References to HMX CRex or CRex in the following can be interpreted as equivalent to the Red Flags Server. The Red Flags Excel Workbench Add-in applies the [HMX.ai CRex<sup>TM</sup> Add-in for Excel](https://appsource.microsoft.com/en-us/product/office/WA200005695?tab=Overview), which is free to download from Microsoft AppSource. Both the Red Flags Server and Excel Workbench have the following key features:
 
-- **Goal-Oriented** - Define tax authority goals most relevant to managing compliance and transparency.
-- **Situation-Centric** - Define the critical situations that a tax authority wants to uncover and track to determine the best actions to take.
-- **Cognitive Maps** - Organize goals and situations in a graphical way to represents compliance management or any other type of plan.
-- **Simulation Scenarios** - Run simulations for what-if scenarios to see the results and fine-tune compliance management plans.
+- **Goal-Oriented** - Define your organization's goals most relevant to managing compliance and transparency.
+- **Situation-Centric** - Define the critical situations that your organization wants to track to determine the best actions to take.
+- **Cognitive Maps** - Organize goals and situations in a graphical way to represents your red flags management plan.
+- **Simulation Scenarios** - Run simulations for what-if scenarios to see the results and fine-tune your management plans.
 - **CoPilot Integration** - Investigate how decisions impact organizational goal achievement and situational awareness with natural language Q&A.
 
 ## Red Flags Server
@@ -17,13 +17,11 @@ The following are prerequisites for deploying the Red Flags Server:
 - An Azure DevOps subscription - see [Sign up for Azure DevOps](https://learn.microsoft.com/en-us/azure/devops/user-guide/sign-up-invite-teammates) for information on setting up an Azure DevOps account. You must create a resource group into which the Red Flags Server resources will be deployed.
 - An understanding of Azure DevOps including configuring and creating Azure DevOps pipelines - see the [Azure Pipelines documentation](https://learn.microsoft.com/en-us/azure/devops/pipelines/?view=azure-devops) for complete information on this topic.
 
-The Red Flags Server is an [HMX.ai](https://hmx.ai) CRex<sup>TM</sup> (Cognitive Reasoning Engine) Enterprise application. References to HMX CRex or CRex in the following can be interpreted as equivalent to the Red Flags Server.
-
-To create the required resources and deploy the Red Flags Server, follow the steps below. You can inspect and edit the provided YAML files to understand the deployment steps and makes adjustments if required. The Red Flags Server is deployed as a container application in [Docker](https://www.docker.com/).
+To create the required resources and deploy the Red Flags Server, follow the steps below. You can inspect and edit the provided YAML files to understand the deployment steps and make adjustments if required; however, only the configurations described below are needed for a sucessfull deployment and completion of the functional tests. The Red Flags Server is deployed as a container application in [Docker](https://www.docker.com/).
 
 ### Configuration and Deployment
 
-1. Change the registry password and service principal ID. The [azure-resource.parameters.json](RedFlagsServer_and_Workbench/Deployment/ARM/azure-resources.parameters.json) contains two configurations that are required before deployment:
+1. Change the service principal ID. The [azure-resource.parameters.json](RedFlagsServer_and_Workbench/Deployment/ARM/azure-resources.parameters.json) contains two configurations, only one of which is required before deployment:
 
 - registryPassword - this is a secure password for accessing the container from which the CRex (i.e., the Red Flags Server) image will be copied. This is an Azure DevOps variable that should not be altered.
 - servicePrincipal - when you follow the steps to connect Azure DevOps to the GitHub repository, a Service Principal will be created automatically. The ID for the Service Principal must be added here.
