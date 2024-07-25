@@ -122,7 +122,7 @@ The Workbench uses the familiar capabilities of Excel to simplify creation and m
 ![Red Flags Workbench Excel Tables](./RedFlagsServer_and_Workbench/images/Picture3.png)
 
 - You can use any data, organized in Excel Tables.
-- To add your own data, use Excel's Data ribbon to get the data you want to analyze and copy it to an Excel worksheet. 
+- To add your own data, use Excel's Data ribbon to get the data you want to analyze, copy it to an Excel worksheet, select the table, then from the Insert menu select Table. In the dialog make sure to select the 'My table has headers' check box and click OK. 
 - Each table is a Key Entity in your analysis. Key Entities are what you’re monitoring to achieve your goals. For example, taxpayers, invoices, etc.
 4. Create a Cognitive Map.
 - On the Add-in landing pane, Click **+** (see figure above) to build your own Cognitive Map.  A Cognitive Map contains the goals you wish to achieve, and the situations that impact them.
