@@ -75,7 +75,7 @@ Every Red Flags Server requires Red Flags Definitions, available as pre-existing
 
 - **Red Flags Definitions** - red flags are *Situations* that are critical to monitor so that appropriate actions can be taken to correct or mitigate the red flag. The action taken in response to a red flag depends on the *Goals* that you want to achieve.
 
-    For example, in a VAT Tax compliance application, if a commercial taxpayer is possibly avoiding tax obligations by mis-reporting cash payments, as indicated by a high percentage of reported credit-card payments compared to similar businesses, then the Tax Authority goal of "Ensuring correct tax payment rates" is not achieved, and action should be take to notifying taxpayers with these red flags of possible non-compliance to tax laws. 
+    For example, in a VAT Tax compliance application, if a commercial taxpayer is possibly avoiding tax obligations by mis-reporting cash payments, as indicated by a high percentage of reported credit-card payments compared to similar businesses, then the Tax Authority goal of "Ensuring correct tax payment rates" is not achieved, and action should be take to notify taxpayers with these red flags of possible non-compliance to tax laws. 
 
 These Goal-Situation (or red flag) relationships are defined in a CRex *Cognitive Map* structure that associates each red flag with a goal. You can examine the structure of the cognitive map used in this example by inspecting the [VAT-Tax-CognitiveMap.json](./RedFlagsServer_and_Workbench/Deployment/Configuration/VAT-Tax-CognitiveMap.json) file, which renders in a graphical construction environment within the Excel Add-in described in the next section, as shown at right in the figure below. No changes should be made to this file.
 
