@@ -71,17 +71,13 @@ The YAML file will now run and create all required resources, set the needed con
 
 The last step in the deployment described above starts the Red Flags Server application with a small example based on a production application of the server for real-time VAT Tax compliance. This example implements the 'hot path' or real-time message/transaction processing shown in the bottom left of this high-level depiction of the Microsoft Accelerator architecture that the Red Flags Server, shown at top right, is designed to support.
 
-![High Level Architecture](RedFlagsServer_and_Workbench\images\High-level-architecture.png)
+![High Level Architecture](./RedFlagsServer_and_Workbench/images/High-level-architecture.png)
 
 Every Red Flags Server requires Red Flags Definitions, available as pre-existing templates that are modified as needed to support specific applications, and a Data Model. *No changes are required to these two configuration files to complete the functional tests.*
 
 - **Red Flags Definitions** - red flags are *Situations* that are critical to monitor so that appropriate actions can be taken to correct or mitigate the red flag. The action taken in response to a red flag depends on the *Goals* that you want to achieve.
 
----
-
     For example, in a VAT Tax compliance application, if a commercial taxpayer is possibly avoiding tax obligations by mis-reporting cash payments, as indicated by a high percentage of reported credit-card payments compared to similar businesses, then the Tax Authority goal of "Ensuring correct tax payment rates" is not achieved, and action should be take to notifying taxpayers with these red flags of possible non-compliance to tax laws. 
-
----
 
 These Goal-Situation (or red flag) relationships are defined in a CRex *Cognitive Map* structure that associates each red flag with a goal. You can examine the structure of the cognitive map used in this example by inspecting the [VAT-Tax-CognitiveMap.json](RedFlagsServer_and_Workbench\Deployment\Configuration\VAT-Tax-CognitiveMap.json) file, which renders in a graphical construction environment within the Excel Add-in described in the next section, as shown at right in the figure below. No changes should be made to this file.
 
@@ -95,7 +91,7 @@ The functional tests consist of (a) checking the Container App Log stream to con
 
 2. Confirm that results are being written to the SQL Server database. The deployed resources include a SQL database resource that you will find in the resource group listing. Navigate to this resource and select 'Query editor (preview)' (You will need the 'sqladmin' password, which you can retrieve from the 'key vault' resource created in the deployment. Search for the 'Key vault' that was created, navigate to the 'Secrets', select 'Database--AdminPassword', select the 'CURRENT VERSION' in the list, and click the copy icon at the end of the 'Secret value' text box.). Log into the Query Editor and 'situation_results_true' table as shown in the figure below. Confirm that this table contains several rows with data in all columns with the exception of the 'simulation_date' (this) column is not populated since the example Red Flags Server application is running in real-time mode rather than simulation mode).
 
-![SituationResults](RedFlagsServer_and_Workbench\images\SituationResults-query.png)
+![SituationResults]./RedFlagsServer_and_Workbench/images/SituationResults-query.png)
 
 For more information on the Red Flags Server, implemented in [HMX.ai](https://hmx.ai) CRex<sup>TM</sup> Enterprise, please email [info@HMX.ai](mailto:info@hmx.ai?subject=Information%20on%20CRex%20Enterprise).
 
