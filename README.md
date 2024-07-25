@@ -93,7 +93,7 @@ The functional tests consist of (a) checking the Container App Log stream to con
 
 ![SituationResults](./RedFlagsServer_and_Workbench/images/SituationResults-query.png)
 
-For more information on the Red Flags Server, implemented in [HMX.ai](https://hmx.ai) CRex<sup>TM</sup> Enterprise, please email [info@HMX.ai](mailto:info@hmx.ai?subject=Information%20on%20CRex%20Enterprise).
+For more information on the Red Flags Server, implemented in [HMX.ai](https://hmx.ai) CRex<sup>TM</sup> Enterprise, please email [ai@HMX.ai](mailto:ai@hmx.ai?subject=Information%20on%20CRex%20Enterprise).
 
 ## Red Flags Workbench Excel Add-in
 
