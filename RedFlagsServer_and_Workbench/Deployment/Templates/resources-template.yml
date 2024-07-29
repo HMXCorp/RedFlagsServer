@@ -25,8 +25,8 @@ jobs:
       scriptLocation: 'inlineScript'
       inlineScript: |
         location=${{ parameters.resourceGroupLocation }}
-        templateFile='Deployment/ARM/azure-resources.json'
-        parametersFile='Deployment/ARM/azure-resources.parameters.json'
+        templateFile='RedFlagsServer_and_Workbench/Deployment/ARM/azure-resources.json'
+        parametersFile='RedFlagsServer_and_Workbench/Deployment/ARM/azure-resources.parameters.json'
 
         echo "Creating resource group: ${{ parameters.resourceGroupName }}"
         az group create \
@@ -46,8 +46,8 @@ jobs:
       scriptType: 'bash'
       scriptLocation: 'inlineScript'
       inlineScript: |
-        cmPath='Deployment/Configuration/VAT-Tax-CognitiveMap.json'
-        dmPath='Deployment/Configuration/VAT-Tax-DataModel.xmi'
+        cmPath='RedFlagsServer_and_Workbench/Deployment/Configuration/VAT-Tax-CognitiveMap.json'
+        dmPath='RedFlagsServer_and_Workbench/Deployment/Configuration/VAT-Tax-DataModel.xmi'
         storageName=$(az storage account list --resource-group ${{ parameters.resourceGroupName }} --query '[0].name' --output tsv)
         storageConnectionString=$(az storage account show-connection-string --resource-group ${{ parameters.resourceGroupName }} --name $storageName --query connectionString --output tsv)
         containerName='crex'
@@ -85,7 +85,7 @@ jobs:
       inlineScript: |
         keyVaultName=$(az keyvault list --resource-group ${{ parameters.resourceGroupName }} --query "[0].name" -o tsv)
         echo "##vso[task.setvariable variable=keyVaultName]$keyVaultName"
-
+  
   - task: AzureKeyVault@2
     displayName: 'Fetch Key Vault Secrets'
     inputs:
@@ -168,7 +168,7 @@ jobs:
       DatabaseName: 'hmxcrex-sqldatabase'
       SqlUsername: '$(Database--AdminUsername)'
       SqlPassword: '$(Database--AdminPassword)'
-      SqlFile: 'Deployment/Configuration/CRex_Create.sql'
+      SqlFile: 'RedFlagsServer_and_Workbench/Deployment/Configuration/CRex_Create.sql'
 
   - task: SqlAzureDacpacDeployment@1
     displayName: 'Create Tax Tables'
@@ -179,7 +179,7 @@ jobs:
       DatabaseName: 'hmxcrex-sqldatabase'
       SqlUsername: '$(Database--AdminUsername)'
       SqlPassword: '$(Database--AdminPassword)'
-      SqlFile: 'Deployment/Configuration/Tax_Create.sql'
+      SqlFile: 'RedFlagsServer_and_Workbench/Deployment/Configuration/Tax_Create.sql'
 
   - task: AzureCLI@2
     displayName: 'Add Container App IP to Database Firewall'

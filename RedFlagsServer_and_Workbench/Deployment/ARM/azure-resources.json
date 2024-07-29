@@ -171,6 +171,7 @@
           "name": "standard"
         },
         "tenantId": "[subscription().tenantId]",
+        "enableSoftDelete": false,
         "enableRbacAuthorization": true
       }
     },
@@ -228,7 +229,8 @@
       "scope": "[concat('Microsoft.KeyVault/vaults/', variables('keyVaultName'))]",
       "properties": {
         "roleDefinitionId": "[variables('keyVaultSecretsOfficerRoleDefinitionId')]",
-        "principalId": "[parameters('servicePrincipalId')]"
+        "principalId": "[parameters('servicePrincipalId')]",
+        "principalType": "ServicePrincipal"
       }
     },
     {

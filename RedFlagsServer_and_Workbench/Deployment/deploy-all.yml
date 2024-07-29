@@ -28,4 +28,4 @@ stages:
   - template: Templates/crex-template.yml
     parameters:
       resourceGroupName: ${{ parameters.resourceGroupName }}
-      azureSubscription: ${{ variables.AzureSubscription }}
+      azureSubscription: ${{ variables.azureSubscription }}
